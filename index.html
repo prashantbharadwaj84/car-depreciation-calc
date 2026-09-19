@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#090d16] text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MACRS Vehicle Depreciation Calculator | Bharrys Financial Suite</title>
+    <!-- GoatCounter Analytics Tracker -->
+    <script 
+        data-goatcounter="https://bharrys.goatcounter.com/count" 
+        async 
+        src="//gc.zgo.at/count.js" 
+        id="goatcounter-script"
+        onload="window.goatcounterLoaded = true;"
+        onerror="window.goatcounterBlocked = true;">
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#090d16',
+                            card: '#111827',
+                            border: 'rgba(255, 255, 255, 0.08)',
+                            cyan: '#38bdf8',
+                            indigo: '#818cf8',
+                            emerald: '#34d399',
+                            amber: '#fbbf24'
+                        }
+                    },
+                    boxShadow: {
+                        glow: '0 0 25px -5px rgba(56, 189, 248, 0.15)',
+                        'glow-emerald': '0 0 25px -5px rgba(52, 211, 153, 0.2)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card-invest {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(52, 211, 153, 0.25);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Print Optimization Styles */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+            header, footer, .no-print {
+                display: none !important;
+            }
+            .glass-panel, .glass-card-invest {
+                background: #ffffff !important;
+                border: 1px solid #cccccc !important;
+                box-shadow: none !important;
+                color: #000000 !important;
+            }
+            text, h1, h2, h3, h4, span, p, td, th {
+                color: #000000 !important;
+            }
+            input, select {
+                border: 1px solid #999999 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-black bg-[#090d16] text-slate-100">
+
+    <!-- Background Glow Effects -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0 no-print">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/3 -right-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 left-1/3 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Header Navbar -->
+    <header class="relative z-10 border-b border-slate-800/80 bg-[#090d16]/80 backdrop-blur-md sticky top-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="https://financialhub.bharrys.com" class="p-2.5 bg-slate-900 border border-slate-700/60 rounded-xl text-emerald-400 hover:border-emerald-400 transition shadow-glow">
+                    <i data-lucide="car" class="w-6 h-6"></i>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white font-mono">BHARRYS <span class="text-emerald-400">FINANCIAL</span></h1>
+                        <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/50">MACRS DEPRECIATION</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-0.5">Vehicle Asset Depreciation & Tax Deduction Model</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button type="button" onclick="shareConfiguration()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-cyan-400 hover:text-white hover:border-cyan-500 transition cursor-pointer">
+                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                    <span id="share-btn-text">Share</span>
+                </button>
+
+                <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-emerald-400 hover:text-white hover:border-emerald-500 transition cursor-pointer">
+                    <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                    <span>Print Schedule</span>
+                </button>
+
+                <a href="https://financialhub.bharrys.com" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-600 transition">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    <span>Suite Hub</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Hero Banner with Presets -->
+        <section class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-700/80 text-xs font-medium text-emerald-400 mb-2">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                        <span>IRS 5-Year MACRS Asset Depreciation Engine</span>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                        Vehicle Depreciation <span class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">& Tax Savings Calculator</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+                        Compute asset depreciation, business tax write-offs, and residual vehicle book values using MACRS convention standards.
+                    </p>
+                </div>
+
+                <!-- Asset Vehicle Presets -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto shrink-0 no-print">
+                    <span class="text-xs font-mono text-slate-400 whitespace-nowrap">Vehicle Presets:</span>
+                    <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                        <button type="button" onclick="loadPreset('sedan')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-cyan-400 border border-slate-700 transition">
+                            Sedan ($35k)
+                        </button>
+                        <button type="button" onclick="loadPreset('suv')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-amber-400 border border-slate-700 transition">
+                            SUV ($65k)
+                        </button>
+                        <button type="button" onclick="loadPreset('truck')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-emerald-400 border border-slate-700 transition">
+                            Truck ($85k)
+                        </button>
+                        <button type="button" onclick="loadPreset('fleet')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-indigo-400 border border-slate-700 transition">
+                            Luxury / Fleet ($120k)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Executive Summary Banner -->
+        <section id="summary-banner" class="glass-panel rounded-3xl p-6 relative overflow-hidden border-emerald-500/30">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
+                <!-- Main Portfolio Highlight -->
+                <div class="flex items-start gap-4 w-full lg:w-1/2">
+                    <div class="p-3.5 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+                        <i data-lucide="receipt" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-mono uppercase tracking-wider font-bold text-emerald-400 bg-emerald-950 px-2.5 py-0.5 rounded-md border border-emerald-800">Tax Shield Summary</span>
+                        <h3 id="summary-tax-savings" class="text-2xl font-extrabold text-white mt-1">$0</h3>
+                        <p id="summary-deduction-desc" class="text-xs text-slate-300 mt-1 leading-relaxed">
+                            Total estimated business tax savings over the 6-year recovery lifecycle across <span class="text-emerald-400 font-bold" id="summary-business-basis">$0</span> of write-off basis.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Key Metrics Pill Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full lg:w-1/2 text-xs font-mono">
+                    <div class="p-3 bg-slate-900/80 rounded-2xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400">Total Deductible Basis</span>
+                        <p class="text-base font-extrabold text-cyan-400 mt-0.5" id="sum-total-basis">$0</p>
+                    </div>
+                    <div class="p-3 bg-slate-900/80 rounded-2xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400" id="sum-current-year-label">Current Year Deduction</span>
+                        <p class="text-base font-extrabold text-emerald-400 mt-0.5" id="sum-current-year-deduction">$0</p>
+                    </div>
+                    <div class="p-3 bg-slate-900/80 rounded-2xl border border-slate-800 col-span-2 sm:col-span-1">
+                        <span class="text-[10px] text-slate-400">Tax Reduction %</span>
+                        <p class="text-base font-extrabold text-indigo-400 mt-0.5" id="sum-tax-effective-rate">0.0%</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TWO COLUMN INPUT & BREAKDOWN LAYOUT -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- LEFT COLUMN: INPUT PARAMETERS (5 Cols) -->
+            <div class="lg:col-span-5 glass-card-invest rounded-3xl p-5 space-y-4">
+                <div class="flex items-center gap-2.5 pb-2.5 border-b border-emerald-500/20">
+                    <div class="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        <i data-lucide="sliders" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">Vehicle & Tax Parameters</h3>
+                        <p class="text-[10px] text-slate-400">Configure cost basis & MACRS options</p>
+                    </div>
+                </div>
+
+                <!-- Parameters Form Grid -->
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <!-- Vehicle Purchase Price -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1">Vehicle Cost Basis ($)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-mono">$</span>
+                            <input type="number" id="input-cost" value="50000" step="1000" min="0" oninput="calculateAll()" class="w-full pl-7 pr-3 py-1.5 bg-slate-900 border border-emerald-500/40 rounded-xl text-white font-mono font-bold text-xs outline-none focus:border-emerald-400 transition">
+                        </div>
+                    </div>
+
+                    <!-- Date Placed In Service -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1">Date In Service</label>
+                        <input type="date" id="input-service-date" onchange="calculateAll()" class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono font-bold text-xs outline-none focus:border-emerald-400 transition">
+                    </div>
+
+                    <!-- Business Use % -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                            <span>Business Use</span>
+                            <span class="text-emerald-400 font-mono font-bold" id="business-use-label">100%</span>
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="input-business-pct" value="100" min="1" max="100" oninput="syncBusinessSlider()" class="w-full pr-6 pl-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono font-bold text-xs outline-none focus:border-emerald-400 transition">
+                            <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-[10px]">%</span>
+                        </div>
+                    </div>
+
+                    <!-- Tax Bracket Rate -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                            <span>Tax Bracket</span>
+                            <span class="text-cyan-400 font-mono font-bold" id="tax-rate-label">25.0%</span>
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="input-tax-rate" value="25.0" step="1" min="0" max="50" oninput="syncTaxSlider()" class="w-full pr-6 pl-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono font-bold text-xs outline-none focus:border-emerald-400 transition">
+                            <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-[10px]">%</span>
+                        </div>
+                    </div>
+
+                    <!-- Business Use Slider -->
+                    <div class="col-span-2">
+                        <input type="range" id="slider-business-pct" min="1" max="100" value="100" step="1" oninput="syncBusinessInput()" class="w-full accent-emerald-400 cursor-pointer no-print">
+                    </div>
+
+                    <!-- MACRS Convention -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1">Convention Standard</label>
+                        <select id="input-convention" onchange="calculateAll()" class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono font-semibold text-xs outline-none focus:border-emerald-400 transition">
+                            <option value="half-year" selected>Half-Year Convention</option>
+                            <option value="mid-quarter">Mid-Quarter Convention (Q4)</option>
+                        </select>
+                    </div>
+
+                    <!-- Depreciation Method -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1">Depreciation Method</label>
+                        <select id="input-method" onchange="calculateAll()" class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono font-semibold text-xs outline-none focus:border-emerald-400 transition">
+                            <option value="200db" selected>200% Declining Balance</option>
+                            <option value="150db">150% Declining Balance</option>
+                            <option value="sl">Straight Line Method</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Output Summary Sidebar -->
+                <div class="pt-3 border-t border-emerald-500/20 bg-slate-900/80 rounded-2xl p-3.5 space-y-2 font-mono text-xs">
+                    <h4 class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Asset Depreciation Breakdown</h4>
+
+                    <div class="flex justify-between items-center py-0.5 border-b border-slate-800">
+                        <span class="text-slate-400">Total Vehicle Cost</span>
+                        <span class="text-white font-bold" id="out-initial-cost">$50,000</span>
+                    </div>
+
+                    <div class="flex justify-between items-center py-0.5 border-b border-slate-800">
+                        <span class="text-slate-400">Eligible Business Basis</span>
+                        <span class="text-cyan-400 font-bold" id="out-business-basis">$50,000</span>
+                    </div>
+
+                    <div class="flex justify-between items-center py-0.5 border-b border-slate-800">
+                        <span class="text-slate-400" id="out-current-year-title">Current Year Deduction</span>
+                        <span class="text-amber-400 font-bold" id="out-current-year-deduction">$0</span>
+                    </div>
+
+                    <div class="flex justify-between items-center py-0.5 border-b border-slate-800">
+                        <span class="text-slate-400">Total Deductions (6 yrs)</span>
+                        <span class="text-emerald-400 font-bold" id="out-total-deduction">$50,000</span>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-1 text-xs bg-emerald-950/40 p-2 rounded-xl border border-emerald-800/40">
+                        <span class="text-emerald-300 font-bold">Est. Total Tax Savings</span>
+                        <span class="text-emerald-400 font-extrabold text-sm" id="out-tax-savings">$12,500</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: VISUAL COMPARISON BARS & MILESTONES TABLE (7 Cols) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <!-- Visual Breakdown Bar Comparison -->
+                <div class="glass-panel rounded-3xl p-6 space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-400"></i>
+                            <h3 class="text-base font-bold text-white">Value Retention & Tax Shield</h3>
+                        </div>
+                        <span class="text-xs text-slate-400">IRS Recovery Period: <span class="font-mono text-white">5-Year Class</span></span>
+                    </div>
+
+                    <div class="space-y-6 text-xs font-mono">
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-slate-300 font-sans font-semibold">
+                                <span>Total Tax Savings vs Residual Basis</span>
+                                <span id="bar-tax-ratio" class="text-emerald-400 font-mono">Tax Savings: 25.0%</span>
+                            </div>
+                            <div class="h-8 bg-slate-900 rounded-xl border border-slate-800 flex overflow-hidden p-1 gap-1">
+                                <div id="bar-savings" class="bg-emerald-400 rounded-lg flex items-center justify-center text-black font-extrabold transition-all duration-500 overflow-hidden" style="width: 25%;">
+                                    <span id="bar-savings-val" class="text-[10px] px-1 truncate">$12,500</span>
+                                </div>
+                                <div id="bar-unclaimed" class="bg-cyan-500 rounded-lg flex items-center justify-center text-black font-extrabold transition-all duration-500 overflow-hidden" style="width: 75%;">
+                                    <span id="bar-unclaimed-val" class="text-[10px] px-1 truncate">$37,500</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                                <span class="text-emerald-400">■ Total IRS Tax Benefit Shield</span>
+                                <span class="text-cyan-400">■ Remaining Net Vehicle Cost Basis</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Annual Depreciation Milestones Table -->
+                <div class="glass-panel rounded-3xl p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="table" class="w-5 h-5 text-cyan-400"></i>
+                            <h3 class="text-base font-bold text-white">MACRS 5-Year Depreciation Schedule</h3>
+                        </div>
+                        <span class="text-[10px] text-slate-400 font-mono">6 Recovery Years</span>
+                    </div>
+
+                    <div class="w-full">
+                        <table class="w-full text-left font-mono text-xs">
+                            <thead class="bg-slate-900/90 text-slate-400 border-b border-slate-800">
+                                <tr>
+                                    <th class="py-2.5 px-3">Tax Year</th>
+                                    <th class="py-2.5 px-3">MACRS Rate</th>
+                                    <th class="py-2.5 px-3">Deduction</th>
+                                    <th class="py-2.5 px-3">Tax Savings</th>
+                                    <th class="py-2.5 px-3 text-right">Ending Book Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="milestones-table-body" class="divide-y divide-slate-800/50 text-slate-300">
+                                <!-- Dynamic JS Injection -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- MACRS Strategy, Conventions & Depreciation Methods Reference -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-panel rounded-3xl p-6 space-y-4">
+                <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                    <span>Understanding MACRS Convention Standards</span>
+                </div>
+                <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+                    <p>
+                        <strong>Conventions</strong> determine when during the tax year an asset is treated as being placed in service or disposed of, establishing the deduction allowed for the first and final tax years:
+                    </p>
+                    <ul class="space-y-2 list-disc list-inside text-slate-400">
+                        <li>
+                            <strong class="text-cyan-400">Half-Year Convention:</strong> Assumes the vehicle was placed in service (or disposed of) exactly in the middle of the tax year. This allows a half-year of depreciation in Year 1 and spreads a 5-year asset recovery over 6 calendar tax years.
+                        </li>
+                        <li>
+                            <strong class="text-amber-400">Mid-Quarter Convention:</strong> Required by the IRS if more than 40% of the total cost basis of all depreciable personal property acquired during the year was placed in service during the 4th quarter (Q4).
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-6 space-y-4">
+                <div class="flex items-center gap-2 text-cyan-400 font-bold text-sm">
+                    <i data-lucide="calculator" class="w-4 h-4"></i>
+                    <span>Understanding MACRS Depreciation Methods</span>
+                </div>
+                <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+                    <p>
+                        <strong>Depreciation Methods</strong> define the mathematical rate at which the vehicle's tax basis is written off over its 5-year class life:
+                    </p>
+                    <ul class="space-y-2 list-disc list-inside text-slate-400">
+                        <li>
+                            <strong class="text-emerald-400">200% Declining Balance (200DB):</strong> Front-loads write-offs by doubling the straight-line rate, switching automatically to straight-line when that method yields an equal or greater deduction. Standard for passenger autos and trucks.
+                        </li>
+                        <li>
+                            <strong class="text-indigo-400">150% Declining Balance (150DB):</strong> Offers accelerated write-offs at 1.5 times straight-line rates. Often used under Alternative Minimum Tax (AMT) rules or for alternative business asset elections.
+                        </li>
+                        <li>
+                            <strong class="text-amber-400">Straight Line Method (SL):</strong> Spreads deductions evenly across the full recovery period, minimizing initial write-offs to preserve deductions for future higher-income tax years.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-[#090d16] text-slate-500 text-xs py-6 mt-auto relative z-10">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p>&copy; <span id="year"></span> Bharrys Ventures. MACRS Depreciation Calculator</p>
+        </div>
+    </footer>
+
+    <script>
+        // MACRS standard 5-year class depreciation schedules
+        const MACRS_RATES = {
+            '200db': {
+                'half-year': [0.2000, 0.3200, 0.1920, 0.1152, 0.1152, 0.0576],
+                'mid-quarter': [0.0500, 0.3800, 0.2280, 0.1368, 0.1094, 0.0958]
+            },
+            '150db': {
+                'half-year': [0.1500, 0.2550, 0.1785, 0.1666, 0.1666, 0.0833],
+                'mid-quarter': [0.0375, 0.2888, 0.2021, 0.1640, 0.1640, 0.1436]
+            },
+            'sl': {
+                'half-year': [0.1000, 0.2000, 0.2000, 0.2000, 0.2000, 0.1000],
+                'mid-quarter': [0.0250, 0.2000, 0.2000, 0.2000, 0.2000, 0.1750]
+            }
+        };
+
+        const formatCurrency = (val) => '$' + Math.round(val).toLocaleString('en-US');
+
+        function syncBusinessSlider() {
+            const val = document.getElementById('input-business-pct').value;
+            document.getElementById('slider-business-pct').value = val;
+            calculateAll();
+        }
+
+        function syncBusinessInput() {
+            const val = document.getElementById('slider-business-pct').value;
+            document.getElementById('input-business-pct').value = val;
+            calculateAll();
+        }
+
+        function syncTaxSlider() {
+            calculateAll();
+        }
+
+        function loadPreset(preset) {
+            const costInput = document.getElementById('input-cost');
+
+            if (preset === 'sedan') {
+                costInput.value = 35000;
+            } else if (preset === 'suv') {
+                costInput.value = 65000;
+            } else if (preset === 'truck') {
+                costInput.value = 85000;
+            } else if (preset === 'fleet') {
+                costInput.value = 120000;
+            }
+
+            calculateAll();
+        }
+
+        function shareConfiguration() {
+            const cost = document.getElementById('input-cost').value;
+            const serviceDate = document.getElementById('input-service-date').value;
+            const businessPct = document.getElementById('input-business-pct').value;
+            const taxRate = document.getElementById('input-tax-rate').value;
+            const convention = document.getElementById('input-convention').value;
+            const method = document.getElementById('input-method').value;
+
+            const url = new URL(window.location.href);
+            url.searchParams.set('cost', cost);
+            if (serviceDate) url.searchParams.set('serviceDate', serviceDate);
+            url.searchParams.set('businessPct', businessPct);
+            url.searchParams.set('taxRate', taxRate);
+            url.searchParams.set('convention', convention);
+            url.searchParams.set('method', method);
+
+            navigator.clipboard.writeText(url.toString()).then(() => {
+                const btnText = document.getElementById('share-btn-text');
+                btnText.textContent = 'Link Copied!';
+                setTimeout(() => {
+                    btnText.textContent = 'Share';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy share link: ', err);
+            });
+        }
+
+        function loadFromUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('cost')) document.getElementById('input-cost').value = params.get('cost');
+            if (params.has('serviceDate')) {
+                document.getElementById('input-service-date').value = params.get('serviceDate');
+            } else {
+                // Default to Jan 1st of current year
+                const currentYear = new Date().getFullYear();
+                document.getElementById('input-service-date').value = `${currentYear}-01-01`;
+            }
+            if (params.has('businessPct')) {
+                const val = params.get('businessPct');
+                document.getElementById('input-business-pct').value = val;
+                document.getElementById('slider-business-pct').value = val;
+            }
+            if (params.has('taxRate')) document.getElementById('input-tax-rate').value = params.get('taxRate');
+            if (params.has('convention')) document.getElementById('input-convention').value = params.get('convention');
+            if (params.has('method')) document.getElementById('input-method').value = params.get('method');
+        }
+
+        function calculateAll() {
+            const cost = parseFloat(document.getElementById('input-cost').value) || 0;
+            const serviceDateVal = document.getElementById('input-service-date').value;
+            const businessPct = (parseFloat(document.getElementById('input-business-pct').value) || 0) / 100;
+            const taxRate = (parseFloat(document.getElementById('input-tax-rate').value) || 0) / 100;
+            const convention = document.getElementById('input-convention').value;
+            const method = document.getElementById('input-method').value;
+
+            document.getElementById('business-use-label').textContent = (businessPct * 100).toFixed(0) + '%';
+            document.getElementById('tax-rate-label').textContent = (taxRate * 100).toFixed(1) + '%';
+
+            const businessBasis = cost * businessPct;
+            const selectedRates = MACRS_RATES[method]?.[convention] || MACRS_RATES['200db']['half-year'];
+
+            // Parse service date and calculate calendar years
+            const serviceDate = serviceDateVal ? new Date(serviceDateVal + 'T00:00:00') : new Date();
+            const startYear = serviceDate.getFullYear();
+            const currentCalendarYear = new Date().getFullYear();
+
+            const tableBody = document.getElementById('milestones-table-body');
+            tableBody.innerHTML = '';
+
+            let accumDepreciation = 0;
+            let currentYearDeduction = 0;
+
+            for (let i = 0; i < selectedRates.length; i++) {
+                const taxYear = startYear + i;
+                const rate = selectedRates[i];
+                const annualDeduction = businessBasis * rate;
+                const annualTaxSavings = annualDeduction * taxRate;
+
+                accumDepreciation += annualDeduction;
+                const endingBookValue = Math.max(0, cost - accumDepreciation);
+
+                const isCurrentYear = taxYear === currentCalendarYear;
+                if (isCurrentYear) {
+                    currentYearDeduction = annualDeduction;
+                }
+
+                // Append row
+                const row = document.createElement('tr');
+                row.className = isCurrentYear 
+                    ? 'bg-emerald-950/40 border-l-2 border-emerald-400 hover:bg-emerald-900/30 transition' 
+                    : 'hover:bg-slate-800/30 transition';
+
+                row.innerHTML = `
+                    <td class="py-2 px-3 font-bold text-white flex items-center gap-1.5">
+                        <span>${taxYear}</span>
+                        ${isCurrentYear ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30">NOW</span>' : ''}
+                    </td>
+                    <td class="py-2 px-3 text-cyan-400">${(rate * 100).toFixed(2)}%</td>
+                    <td class="py-2 px-3 ${isCurrentYear ? 'text-amber-400 font-bold' : 'text-emerald-400'}">${formatCurrency(annualDeduction)}</td>
+                    <td class="py-2 px-3 text-indigo-400">${formatCurrency(annualTaxSavings)}</td>
+                    <td class="py-2 px-3 text-right font-bold text-white">${formatCurrency(endingBookValue)}</td>
+                `;
+                tableBody.appendChild(row);
+            }
+
+            const totalTaxSavings = accumDepreciation * taxRate;
+
+            // Summary Banners
+            document.getElementById('summary-tax-savings').textContent = formatCurrency(totalTaxSavings);
+            document.getElementById('summary-business-basis').textContent = formatCurrency(businessBasis);
+            document.getElementById('sum-total-basis').textContent = formatCurrency(businessBasis);
+
+            document.getElementById('sum-current-year-label').textContent = `${currentCalendarYear} Deduction`;
+            document.getElementById('sum-current-year-deduction').textContent = formatCurrency(currentYearDeduction);
+            document.getElementById('sum-tax-effective-rate').textContent = (taxRate * 100).toFixed(1) + '%';
+
+            // Sidebar Displays
+            document.getElementById('out-initial-cost').textContent = formatCurrency(cost);
+            document.getElementById('out-business-basis').textContent = formatCurrency(businessBasis);
+            document.getElementById('out-current-year-title').textContent = `${currentCalendarYear} Deduction`;
+            document.getElementById('out-current-year-deduction').textContent = formatCurrency(currentYearDeduction);
+            document.getElementById('out-total-deduction').textContent = formatCurrency(accumDepreciation);
+            document.getElementById('out-tax-savings').textContent = formatCurrency(totalTaxSavings);
+
+            // Proportion Bar Widths
+            const taxSavingsRatio = cost > 0 ? (totalTaxSavings / cost) * 100 : 0;
+            const remainingRatio = Math.max(0, 100 - taxSavingsRatio);
+
+            document.getElementById('bar-savings').style.width = Math.max(5, taxSavingsRatio) + '%';
+            document.getElementById('bar-unclaimed').style.width = Math.max(5, remainingRatio) + '%';
+            document.getElementById('bar-savings-val').textContent = formatCurrency(totalTaxSavings);
+            document.getElementById('bar-unclaimed-val').textContent = formatCurrency(cost - totalTaxSavings);
+            document.getElementById('bar-tax-ratio').textContent = `Tax Shield: ${taxSavingsRatio.toFixed(1)}%`;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            const yearEl = document.getElementById('year');
+            if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+            loadFromUrlParams();
+            calculateAll();
+        });
+    </script>
+</body>
+</html>
